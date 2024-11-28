@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { parse } from "cookie";
-import "./Chat.css";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../store/store";
+import { getAllChats } from "../slices/ChatSlice";
 
 function Chat() {
+  const dispatch = useDispatch<AppDispatch>();
   const cookie = parse(document.cookie);
   const [loginUser, setLoginUser] = useState<any>(localStorage.getItem("loggedInUser"));
   console.log(loginUser.username);
@@ -13,7 +16,8 @@ function Chat() {
   const [value, setValue] = useState<string>("");
   const [chat, setChat] = useState<any[]>([]); // Store messages as objects
   const socket = useRef<Socket | null>(null);
-
+  const {messages} = useSelector((state: any) => state.chat);
+  
   // Fetch all messages for a particular chat on component mount
   useEffect(() => {
     setLoginUser(JSON.parse(localStorage.getItem("loggedInUser") || "{}"));
@@ -48,9 +52,10 @@ function Chat() {
         console.error("Error fetching messages:", error);
       }
     };
-
-    fetchMessages();
-  }, [personToChat]);
+    dispatch(getAllChats(personToChat || ""));
+    
+    // fetchMessages();
+  }, [dispatch, personToChat]);
 
   useEffect(() => {
     if (!cookie.accessToken) {

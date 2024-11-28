@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 // Define a PrivateRoute component that wraps child components to ensure user authentication
 const PrivateRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   const token = Cookies.get("accessToken");
-  console.log("Token:", token);
   if ( !token) {
     return <Navigate to="/login" replace />;
   }

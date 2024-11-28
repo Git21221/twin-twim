@@ -48,7 +48,9 @@ const Login = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Something went wrong. Please try again.");
+        throw new Error(
+          errorData.message || "Something went wrong. Please try again."
+        );
       }
 
       const data = await response.json();
@@ -69,14 +71,22 @@ const Login = () => {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container
+      component="main"
+      maxWidth="xs"
+      sx={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
-          marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
           bgcolor: "background.paper",
           p: 3,
           borderRadius: 2,
@@ -124,9 +134,19 @@ const Login = () => {
             fullWidth
             variant="contained"
             disabled={loading}
-            sx={{ mt: 3, mb: 2, display: "flex", justifyContent: "center", alignItems: "center" }}
+            sx={{
+              mt: 3,
+              mb: 2,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Sign In"}
+            {loading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Sign In"
+            )}
           </Button>
           <Grid container>
             <Grid item xs>

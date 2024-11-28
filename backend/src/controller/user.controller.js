@@ -168,7 +168,7 @@ const loginUser = asyncFuncHandler(async (req, res) => {
 });
 
 const getUserProfile = asyncFuncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select("-password -_id");
+  const user = await User.findById(req.user._id).select("-password");
   if (!user)
     return res
       .status(404)
@@ -178,4 +178,15 @@ const getUserProfile = asyncFuncHandler(async (req, res) => {
     .json(new apiResponseHandler(200, "User found", user));
 });
 
-export { registerUser, loginUser, getUserProfile };
+const getOtherUserProfile = asyncFuncHandler(async (req, res) => {
+  const user = await User.findById(req?.params?.userId).select("-password");
+  if (!user)
+    return res
+      .status(404)
+      .json(new apiErrorHandler(404, "User not found with that id"));
+  return res
+    .status(200)
+    .json(new apiResponseHandler(200, "User found", user));
+});
+
+export { registerUser, loginUser, getUserProfile, getOtherUserProfile };
