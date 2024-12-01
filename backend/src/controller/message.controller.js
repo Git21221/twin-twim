@@ -79,31 +79,61 @@ export const sendMessage = asyncFuncHandler(async (req, res) => {
 
 export const getAllMessages = asyncFuncHandler(async (req, res) => {
   const { chatId } = req.params;
+  const { page = 0, limit = 10 } = req.query; // Use page number and limit for pagination
+  
+  if (!chatId) {
+    return res.status(400).json(new apiErrorHandler(400, "Chat ID is required"));
+  }
+
   const selectedChat = await Chat.findById(chatId);
 
   if (!selectedChat) {
     return res.status(404).json(new apiErrorHandler(404, "Chat not found"));
   }
 
-  //only send message if the loggedin user is part of the chat
   if (!selectedChat.participants.includes(req.user._id)) {
     return res
       .status(401)
-      .json(new apiErrorHandler(401, "user is not part of the chat"));
+      .json(new apiErrorHandler(401, "User is not part of the chat"));
   }
+
+  const totalMessages = await Message.countDocuments({ chat: chatId });
 
   const messages = await Message.aggregate([
     {
-      $match: {
-        chat: new mongoose.Types.ObjectId(chatId),
-      },
+      $match: { chat: new mongoose.Types.ObjectId(chatId) },
+    },
+    {
+      $sort: { createdAt: -1 }, // Fetch newest messages first
+    },
+    {
+      $skip: page * limit, // Skip messages based on the current page
+    },
+    {
+      $limit: parseInt(limit), // Limit the number of messages
     },
     ...chatMessageCommonAggregation(),
-    {
-      $sort: {
-        createdAt: 1,
-      },
-    }
   ]);
-  return res.status(200).json(new apiResponseHandler(200, "Messages", messages));
+
+  // Reverse the messages for ascending order
+  messages.reverse();
+
+  return res.status(200).json(
+    new apiResponseHandler(200, "Messages", messages)
+  );
+});
+
+
+
+
+export const getLastMessage = asyncFuncHandler(async (req, res) => {
+  const { chatId } = req?.params;
+  const lastMessage = await Chat.findById(chatId).populate("lastMessage");
+  if (!lastMessage) {
+    return res.status(404).json(new apiErrorHandler(404, "Chat not found"));
+  }
+  console.log(lastMessage);
+  return res
+    .status(200)
+    .json(new apiResponseHandler(200, "Last message", lastMessage));
 });

@@ -16,6 +16,8 @@ const chatCommonAggregation = () => {
         foreignField: "_id",
         as: "participants",
       },
+    },
+    {
       $lookup: {
         from: "messages",
         localField: "lastMessage",
@@ -30,7 +32,17 @@ const chatCommonAggregation = () => {
               as: "sender",
             },
           },
+          {
+            $addFields: {
+              sender: { $first: "$sender" },
+            },
+          },
         ],
+      },
+    },
+    {
+      $addFields: {
+        lastMessage: { $first: "$lastMessage" },
       },
     },
   ];
@@ -55,6 +67,33 @@ const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
       },
     },
   ]); //search for twims
+  const chats = await Chat.aggregate([
+    {
+      $match: {
+        participants: {
+          $elemMatch: { $eq: req.user._id },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "messages",
+        localField: "lastMessage",
+        foreignField: "_id",
+        as: "lastMessage",
+      },
+    },
+  ]);
+
+  twims.forEach((twim) => {
+    twim.lastMessage = chats.find((chat) =>
+      chat.participants.find(
+        (participant) => participant.toString() === twim._id.toString()
+      )
+    )?.lastMessage[0];
+  });
+  console.log("chats", chats);
+
   //if available send the list of twims
   if (twims.length !== 0) {
     res.status(200).json(new apiResponseHandler(200, "twims fetched", twims));
@@ -65,7 +104,7 @@ const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
 
 const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
   const { personToChatId } = req?.params;
-
+  console.log(personToChatId);
   //check if the user exists
   const receiver = await User.findById(personToChatId);
 
@@ -142,8 +181,8 @@ const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
     emitSocketEvent(req, participant._id?.toString(), "newChat", newChat);
   });
   return res
-    .status(201)
-    .json(new apiResponseHandler(201, "Chat created", createNewChat));
+    .status(200)
+    .json(new apiResponseHandler(200, "Chat created", createNewChat));
 });
 
 export { searchAvailabletwims, createOneOnOneChat };

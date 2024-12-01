@@ -14,7 +14,6 @@ const verifyJWT = asyncFuncHandler(async (req, res, next) => {
       const { accessToken, refreshToken } = await refreshAccessToken(req, res);
       token = accessToken;
     }
-    console.log(token);
     if (!token)
       return res
         .status(403)

@@ -3,30 +3,39 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
+import { getLastMessage } from "../../slices/ChatSlice";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
   setPersonToChat: React.Dispatch<React.SetStateAction<string>>;
+  setChatId: React.Dispatch<React.SetStateAction<string>>;
+  chatId: string;
 }
 
 const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   setEmptyChat,
   setPersonToChat,
+  setChatId,
+  chatId,
 }: {
   setEmptyChat: any;
   setPersonToChat: any;
+  setChatId: any;
+  chatId: string;
 }) => {
   const { users, profile, loading, error } = useSelector(
     (state: RootState) => state.users
   );
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const [id, setId] = React.useState("");
 
   // Fetch profile only if it's not available or we are in error state
   useEffect(() => {
     try {
       dispatch(fetchUserProfile());
       dispatch(fetchAvailableUsers());
+      // dispatch(getLastMessage(chatId));
     } catch (error: any) {
       console.log(error.message);
       if (error.message === "Unauthorized") {
@@ -50,19 +59,26 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
       );
 
       const data = await response.json();
-      // navigate(`/chat/${data.data?._id}/${name}`);
+      if (data.message == "Chat created") {
+        setChatId(data?.data[0]?._id);
+        setId(data?.data[0]?._id);
+      } else {
+        // navigate(`/chat/${data.data?._id}/${name}`);
+        setChatId(data?.data?._id);
+        setId(data?.data?._id);
+      }
       setEmptyChat(false);
-      setPersonToChat(data?.data?._id);
+      setPersonToChat(id);
     } catch (error) {
       console.error("Error starting chat:", error);
     }
   };
 
   // Loading state
-  if (loading) return <p>Loading...</p>;
+  // if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="overflow-y-auto max-w-[350px] h-[calc(100vh-220px)]">
+    <div className="overflow-y-auto max-w-[350px] h-[calc(100vh-207px)]">
       {users?.length > 0 ? (
         <>
           {error ? (
@@ -71,7 +87,11 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
             users.map((user: any) => (
               <div
                 key={user._id}
-                className="max-w-[338px] p-4 hover:bg-[--chat-hover-color] m-[6px] rounded-lg"
+                className={`max-w-[338px] p-4 hover:bg-[--chat-hover-color] m-[6px] rounded-lg ${
+                  id === user?.lastMessage?.chat
+                    ? "bg-[--chat-active-color]"
+                    : ""
+                }`}
               >
                 <div className="flex gap-[22px] items-center">
                   <div className="profilePic">
@@ -87,15 +107,25 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                       >
                         {user.firstName} {user.lastName}
                       </p>
-                      <div className="time text-sm font-light">2:41 AM</div>
+                      <div className="time text-sm font-light">
+                        {user?.lastMessage?.createdAt
+                          ? new Date(
+                              user.lastMessage.createdAt
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                          : ""}
+                      </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-light break-words line-clamp-1 max-w-[220px]">
-                        last message wda dwa wdahwda jhwda jhwdsa hwda wdha
-                      </p>
-                      <div className="count bg-[--highlighted-color] rounded-full h-6 w-6 text-[--main-chat-text-color] flex items-center justify-center text-sm font-semibold">
+                      <span className="text-sm font-light break-words line-clamp-1 max-w-[220px]">
+                        {user.lastMessage ? user.lastMessage.content : ""}
+                      </span>
+                      <span className="count bg-[--highlighted-color] rounded-full text-[--main-chat-text-color] flex items-center justify-center text-sm font-semibold px-[6px]">
                         5
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>

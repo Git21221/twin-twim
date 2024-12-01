@@ -3,6 +3,7 @@ import authSlice from "../slices/authSlice.js";
 import availableUserSlice from "../slices/availableUserSlice.js";
 import userSlice from "../slices/userSlice.js";
 import chatSlice from "../slices/ChatSlice.js";
+import messageSlice from "../slices/messageSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     availableUser: availableUserSlice.reducer,
     users: userSlice.reducer,
     chat: chatSlice.reducer,
+    message: messageSlice.reducer,
   },
 });
 

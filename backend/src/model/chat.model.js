@@ -12,7 +12,7 @@ const chatSchema = new Schema(
       default: false,
     },
     lastMessage: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: "Message",
     },
     participants: [
