@@ -26,9 +26,9 @@ export const io = new Server(httpServer, {
 app.set("io", io);
 
 // Middleware
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
 app.use(morgan("dev")); // Logger
 
 // Routes

@@ -12,16 +12,16 @@ const chatCommonAggregation = () => {
     {
       $lookup: {
         from: "users",
-        localField: "participants",
         foreignField: "_id",
+        localField: "participants",
         as: "participants",
       },
     },
     {
       $lookup: {
         from: "messages",
-        localField: "lastMessage",
         foreignField: "_id",
+        localField: "lastMessage",
         as: "lastMessage",
         pipeline: [
           {

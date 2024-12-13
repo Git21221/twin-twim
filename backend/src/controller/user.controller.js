@@ -3,7 +3,13 @@ import { asyncFuncHandler } from "../utils/asyncFuncHandler.util.js";
 import { apiErrorHandler } from "../utils/apiErrorHandler.util.js";
 import { apiResponseHandler } from "../utils/apiResponseHandler.util.js";
 import { generateAccessAndRefreshToken } from "../utils/generateAccessRefreshToken.util.js";
-import { accessTokenOptions, refreshTokenOptions } from "../utils/refreshAccessToken.util.js";
+import {
+  accessTokenOptions,
+  refreshTokenOptions,
+} from "../utils/refreshAccessToken.util.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 //controller for registering a user
 const registerUser = asyncFuncHandler(async (req, res) => {
@@ -173,9 +179,7 @@ const getUserProfile = asyncFuncHandler(async (req, res) => {
     return res
       .status(404)
       .json(new apiErrorHandler(404, "User not found with that id"));
-  return res
-    .status(200)
-    .json(new apiResponseHandler(200, "User found", user));
+  return res.status(200).json(new apiResponseHandler(200, "User found", user));
 });
 
 const getOtherUserProfile = asyncFuncHandler(async (req, res) => {
@@ -184,9 +188,27 @@ const getOtherUserProfile = asyncFuncHandler(async (req, res) => {
     return res
       .status(404)
       .json(new apiErrorHandler(404, "User not found with that id"));
-  return res
-    .status(200)
-    .json(new apiResponseHandler(200, "User found", user));
+  return res.status(200).json(new apiResponseHandler(200, "User found", user));
 });
 
-export { registerUser, loginUser, getUserProfile, getOtherUserProfile };
+const auth = asyncFuncHandler(async (req, res) => {
+  const token = req?.cookies?.accessToken;
+  console.log("token",token);
+  //check if token is valid
+  if (!token)
+    return res.status(401).json(new apiErrorHandler(401, "Token required"));
+  //verify token
+  const userId = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+  //check if user exists
+  if (!userId)
+    return res.status(401).json(new apiErrorHandler(401, "Token not found"));
+  const user = await User.findById(new mongoose.Types.ObjectId(userId._id));
+  if (!user)
+    return res.status(401).json(new apiErrorHandler(401, "Unauthorized"));
+  //send response
+  return res
+    .status(200)
+    .json(new apiResponseHandler(200, "User authenticated", user));
+});
+
+export { registerUser, loginUser, getUserProfile, getOtherUserProfile, auth };

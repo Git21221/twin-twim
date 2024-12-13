@@ -1,16 +1,13 @@
-import React, { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
 
 // Define a PrivateRoute component that wraps child components to ensure user authentication
-const PrivateRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const token = Cookies.get("accessToken");
-  if ( !token) {
+const PrivateRoute = () => {
+  const isLoggedIn = useSelector((state: { auth: { isAuthenticated: boolean } }) => state.auth.isAuthenticated);
+  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
-  }
-
-  // If profile is available, render the children components
-  return children;
+  } else return <Outlet />;
 };
 
 export default PrivateRoute;
