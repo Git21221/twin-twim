@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppDispatch } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage, getAllChats, resetMessages } from "../../slices/ChatSlice";
-import { io, Socket } from "socket.io-client";
-import { parse } from "cookie";
+import { addMessage, getAllChats, resetMessages, setIsOnline, setTyping } from "../../slices/ChatSlice";
+import { useSocket } from "../../context/SocketContext";
+// import { parse } from "cookie";
 
 interface Message {
   _id: string;
@@ -25,14 +25,13 @@ interface ChatsProps {
 
 export function Chats({ chatId }: ChatsProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const cookie = parse(document.cookie);
-  const { messages, loading } = useSelector((state: any) => state.chat);
+  const { messages, loading, isTyping } = useSelector((state: any) => state.chat);
   const { profile } = useSelector((state: any) => state.users);
+  const { socket } = useSocket(); // Use the WebSocket instance from Context
 
   const [page, setPage] = useState(0);
-  const socket = useRef<Socket | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
-
+  
   // Utility to determine message date label
   const getDateLabel = (messageDate: string) => {
     const messageTime = new Date(messageDate);
@@ -94,6 +93,7 @@ export function Chats({ chatId }: ChatsProps) {
     }
   }, [chatId, dispatch, loading, messages.length, page]);
 
+  // scroll to bottom of the chat
   useEffect(() => {
     const container = chatContainerRef.current;
     if (container) {
@@ -117,31 +117,15 @@ export function Chats({ chatId }: ChatsProps) {
     }
   }, [chatId, dispatch]);
 
-  // Set up WebSocket connection
+  // WebSocket event listeners
   useEffect(() => {
-    if (!cookie.accessToken) {
-      console.error("Access token missing!");
-      return;
-    }
+    if (!socket) return;
 
-    if (!socket.current) {
-      socket.current = io("http://localhost:4000", {
-        auth: {
-          token: cookie.accessToken,
-        },
-      });
-    }
+    // Join the chat room
+    socket.emit("chat", chatId);
 
-    socket.current.on("connected", () => {
-      console.log("connected");
-      socket.current?.emit("chat", chatId);
-    });
-
-    socket.current.on("disconnect", (reason: any) => {
-      console.error("Disconnected:", reason);
-    });
-
-    socket.current.on("message", (message: any) => {
+    // Listen for new messages
+    socket.on("message", (message: any) => {
       if (message.chat === chatId) {
         dispatch(addMessage(message));
         if (chatContainerRef.current) {
@@ -150,11 +134,36 @@ export function Chats({ chatId }: ChatsProps) {
       }
     });
 
+    // Listen for typing events
+    socket.on("typing", (chatId: string) => {
+      dispatch(setTyping(true));
+    });
+
+    // Listen for stopped typing events
+    socket.on("stoppedTyping", (chatId: string) => {
+      dispatch(setTyping(false));
+    });
+
+    //listen for user connected
+    socket.on("connected", (data) => {
+      console.log("User connected", data);
+      dispatch(setIsOnline(data.status === "online"));
+    });
+
+    //listen for user disconnected
+    socket.on("disconnected", (data) => {
+      console.log("User disconnected");
+      dispatch(setIsOnline(data.status === "online"));
+    });
+
     return () => {
-      socket.current?.disconnect();
-      socket.current = null;
+      socket.off("message");
+      socket.off("typing");
+      socket.off("stoppedTyping");
+      socket.off("connected");
+      socket.off("disconnected");
     };
-  }, [chatId, cookie.accessToken, dispatch]);
+  }, [chatId, socket, dispatch]);
 
   // Render the chat messages
   return (
@@ -168,7 +177,7 @@ export function Chats({ chatId }: ChatsProps) {
             {/* Date label */}
             <div className="text-center bg-[--chat-active-color] my-4 mx-auto w-fit p-2 rounded-md">{dateLabel}</div>
             {/* Messages for this date */}
-            {groupedMessages[dateLabel].map((message: Message, i:any) => (
+            {groupedMessages[dateLabel].map((message: Message, i: any) => (
               <div
                 key={i}
                 className={`pb-6 pt-4 flex ${

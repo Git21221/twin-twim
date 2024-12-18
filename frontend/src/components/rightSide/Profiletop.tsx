@@ -10,7 +10,8 @@ function Profiletop({ personToChat }: { personToChat: string }) {
   const { otherUserProfile, loading, error } = useSelector(
     (state: RootState) => state.users
   );
-  console.log(otherUserProfile);
+  const {isTyping, isOnline} = useSelector((state: RootState) => state.chat);
+// console.log(isOnline);
 
   useEffect(() => {
     dispatch(fetchUserById(personToChat));
@@ -26,7 +27,8 @@ function Profiletop({ personToChat }: { personToChat: string }) {
           {otherUserProfile?.firstName} {otherUserProfile?.lastName}
         </div>
         <div className="lastSeen text-[var(--main-text-color)] text-xs font-light">
-          Last seen
+          {isTyping ? "typing..." : null}
+          {isOnline ? "online" : null}
         </div>
       </div>
       </div>

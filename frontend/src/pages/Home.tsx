@@ -4,14 +4,35 @@ import AvailableUserChat from "../components/leftSide/AvailableUserChat.tsx";
 import Searchbar from "../components/leftSide/Searchbar.tsx";
 import Profile from "../components/leftSide/Profile.tsx";
 import { Chats, EmptyChat } from "../components/rightSide/Chats.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Profiletop from "../components/rightSide/Profiletop.tsx";
 import InputAndReaction from "../components/rightSide/InputAndReaction.tsx";
+import { AppDispatch } from "../store/store.ts";
+import { useDispatch, useSelector } from "react-redux";
+import { useSocket } from "../context/SocketContext.tsx";
+import { setIsOnline } from "../slices/ChatSlice.ts";
 
 const Home = () => {
   const [emptyChat, setEmptyChat] = useState(true);
   const [personToChat, setPersonToChat] = useState("");
   const [chatId, setChatId] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const {socket} = useSocket();
+  const {isOnline} = useSelector((state: any) => state.chat);
+  console.log(isOnline);
+  useEffect(() => {
+    socket?.on("connected", (data) => {
+      console.log(data.userId === chatId);
+      dispatch(setIsOnline(data?.status === "online"));
+    });
+    socket?.on("disconnected", (data) => {
+      dispatch(setIsOnline(data?.status === "online"));
+    });
+    return () => {
+      socket?.off("connected");
+      socket?.off("disconnected");
+    };
+  }, [chatId, dispatch]);
 
   return (
     <>
@@ -36,13 +57,9 @@ const Home = () => {
             <Profile />
           </div>
           <div className="rightSide">
-            {
-              emptyChat ? "" : <Profiletop personToChat={personToChat} />
-            }
+            {emptyChat ? "" : <Profiletop personToChat={personToChat} />}
             {emptyChat ? <EmptyChat /> : <Chats chatId={chatId} />}
-            {
-              emptyChat ? "" : <InputAndReaction chatId={chatId} />
-            }
+            {emptyChat ? "" : <InputAndReaction chatId={chatId} />}
           </div>
         </div>
       </div>

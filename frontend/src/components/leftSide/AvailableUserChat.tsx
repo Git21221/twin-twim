@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
-import { getLastMessage } from "../../slices/ChatSlice";
+import { getLastMessage, setIsOnline } from "../../slices/ChatSlice";
+import { useSocket } from "../../context/SocketContext";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,6 +29,7 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   );
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const {socket} = useSocket();
   const [id, setId] = React.useState("");
 
   // Fetch profile only if it's not available or we are in error state
@@ -35,6 +37,12 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     try {
       dispatch(fetchUserProfile());
       dispatch(fetchAvailableUsers());
+      socket?.on("connected", (data) => {
+        dispatch(setIsOnline(data?.status === "online"));
+      })
+      socket?.on("disconnected", (data) => {
+        dispatch(setIsOnline(data?.status === "online"));
+      });
       // dispatch(getLastMessage(chatId));
     } catch (error: any) {
       console.log(error.message);

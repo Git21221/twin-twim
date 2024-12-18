@@ -11,6 +11,9 @@ interface ChatState {
   loading: boolean;
   messages: ChatMessage[];
   error: string | null;
+  isTyping: boolean;
+  isOnline: boolean;
+  lastMessage: ChatMessage | null;
 }
 
 interface Props{
@@ -23,6 +26,9 @@ const initialState: ChatState = {
   loading: false,
   messages: [],
   error: null,
+  isTyping: false,
+  isOnline: false,
+  lastMessage: null,
 };
 
 export const getAllChats = createAsyncThunk<ChatMessage[], Props, { rejectValue: string }>(
@@ -87,6 +93,15 @@ const chatSlice = createSlice({
     resetMessages: (state) => {
       state.messages = [];
     },
+    setTyping: (state, action: PayloadAction<boolean>) => {
+      state.isTyping = action.payload;
+    },
+    addLastMessage: (state, action: PayloadAction<ChatMessage>) => {
+      state.lastMessage = action.payload;
+    },
+    setIsOnline: (state, action: PayloadAction<boolean>) => {
+      state.isOnline = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -121,4 +136,4 @@ const chatSlice = createSlice({
 
 export default chatSlice;
 
-export const { addMessage, resetMessages } = chatSlice.actions;
+export const { addMessage, resetMessages, setTyping, addLastMessage, setIsOnline } = chatSlice.actions;

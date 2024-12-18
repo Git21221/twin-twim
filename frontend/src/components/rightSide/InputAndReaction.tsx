@@ -1,4 +1,3 @@
-import React from "react";
 import Emoji from "../Emoji";
 import Attachment from "../Attachment";
 import Mic from "../Mic";
@@ -19,7 +18,7 @@ function InputAndReaction({chatId}: {chatId: string}) {
           <Attachment />
         </div>
         <div className="input w-[-webkit-fill-available]">
-          <Input />
+          <Input chatId={chatId} />
         </div>
         <div className="mic flex items-center aspect-square rounded-md hover:bg-[--chat-hover-color]">
           {newMessage ? <Send chatId={chatId} /> : <Mic />}
