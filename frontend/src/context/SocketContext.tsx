@@ -10,7 +10,8 @@ const getSocket = () => {
     return null;
   }
   
-  return socketio(import.meta.env.VITE_BASE_URL, {
+  return socketio(import.meta.env.VITE_WEBSOCKET_BASE_URL, {
+    transports: ["websocket"],
     withCredentials: true,
     auth: {
       token: accessToken,
