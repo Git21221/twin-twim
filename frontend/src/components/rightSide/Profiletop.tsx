@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { fetchUserById } from "../../slices/userSlice";
-import { Search } from "@mui/icons-material";
 import SearchIcon from "../SearchIcon";
 
 function Profiletop({ personToChat }: { personToChat: string }) {
   const dispatch = useDispatch<AppDispatch>();
-  const { otherUserProfile, loading, error } = useSelector(
+  const { otherUserProfile} = useSelector(
     (state: RootState) => state.users
   );
   const {isTyping, isOnline} = useSelector((state: RootState) => state.chat);

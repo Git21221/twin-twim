@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import Cookies from "js-cookie";
 
 interface AuthStateTypes {
   isAuthenticated: boolean;

@@ -1,7 +1,6 @@
 import { AppDispatch } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewMessage, submitMessage } from "../slices/messageSlice";
-import { setTyping } from "../slices/ChatSlice";
 import { useSocket } from "../context/SocketContext";
 
 function Input({chatId}: {chatId: string}) {

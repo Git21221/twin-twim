@@ -25,7 +25,7 @@ interface ChatsProps {
 
 export function Chats({ chatId }: ChatsProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { messages, loading, isTyping } = useSelector((state: any) => state.chat);
+  const { messages, loading } = useSelector((state: any) => state.chat);
   const { profile } = useSelector((state: any) => state.users);
   const { socket } = useSocket(); // Use the WebSocket instance from Context
 
@@ -135,12 +135,12 @@ export function Chats({ chatId }: ChatsProps) {
     });
 
     // Listen for typing events
-    socket.on("typing", (chatId: string) => {
+    socket.on("typing", () => {
       dispatch(setTyping(true));
     });
 
     // Listen for stopped typing events
-    socket.on("stoppedTyping", (chatId: string) => {
+    socket.on("stoppedTyping", () => {
       dispatch(setTyping(false));
     });
 

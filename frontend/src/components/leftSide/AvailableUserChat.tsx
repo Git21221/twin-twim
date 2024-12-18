@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
-import { getLastMessage, setIsOnline } from "../../slices/ChatSlice";
+import { setIsOnline } from "../../slices/ChatSlice";
 import { useSocket } from "../../context/SocketContext";
 
 interface AvailableUserChatProps {
@@ -17,14 +17,13 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   setEmptyChat,
   setPersonToChat,
   setChatId,
-  chatId,
 }: {
   setEmptyChat: any;
   setPersonToChat: any;
   setChatId: any;
   chatId: string;
 }) => {
-  const { users, profile, loading, error } = useSelector(
+  const { users, error } = useSelector(
     (state: RootState) => state.users
   );
   const dispatch = useDispatch<AppDispatch>();
@@ -53,6 +52,8 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   }, [dispatch]);
 
   const handleChatClick = async (id: string, name: string) => {
+    console.log(name);
+    
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/twims/${id}`,
