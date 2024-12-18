@@ -11,7 +11,7 @@ const getSocket = () => {
   }
   
   return socketio(import.meta.env.VITE_WEBSOCKET_BASE_URL, {
-    transports: ["websocket"],
+    transports: ["websocket", "polling"],
     withCredentials: true,
     auth: {
       token: accessToken,

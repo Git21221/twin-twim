@@ -17,7 +17,7 @@ export const httpServer = createServer(app);
 export const io = new Server(httpServer, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.CORS_ORIGIN || "*", // Secure for production
+    origin: process.env.CORS_ORIGIN, // Secure for production
     credentials: true,
   },
 });
@@ -28,7 +28,7 @@ app.set("io", io);
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 app.use(morgan("dev")); // Logger
 
 // Routes
