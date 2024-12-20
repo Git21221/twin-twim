@@ -7,7 +7,7 @@ import SearchIcon from "../SearchIcon";
 function Profiletop({ personToChat }: { personToChat: string }) {
   const dispatch = useDispatch<AppDispatch>();
   const { otherUserProfile } = useSelector((state: RootState) => state.users);
-  const { isTyping, isOnline } = useSelector((state: RootState) => state.chat);
+  const { isTyping } = useSelector((state: RootState) => state.chat);
   const {onlineUsers} = useSelector((state: RootState) => state.availableUser);
   console.log(otherUserProfile);
 

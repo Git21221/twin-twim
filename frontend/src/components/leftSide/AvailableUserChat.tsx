@@ -4,8 +4,6 @@ import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
 import { setIsOnline } from "../../slices/ChatSlice";
-import { useSocket } from "../../context/SocketContext";
-import { DisabledByDefault } from "@mui/icons-material";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,7 +26,6 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     (state: RootState) => state.users
   );
   const dispatch = useDispatch<AppDispatch>();
-  const {onlineUsers} = useSelector((state: RootState) => state.availableUser);
   const navigate = useNavigate();
   const [id, setId] = React.useState("");
 

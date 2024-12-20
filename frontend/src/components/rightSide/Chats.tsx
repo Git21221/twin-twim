@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppDispatch } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage, getAllChats, resetMessages, setIsOnline, setTyping } from "../../slices/ChatSlice";
+import { addMessage, getAllChats, resetMessages, setTyping } from "../../slices/ChatSlice";
 import { useSocket } from "../../context/SocketContext";
 // import { parse } from "cookie";
 
