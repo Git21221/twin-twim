@@ -15,7 +15,8 @@ export const app = express();
 // HTTP and WebSocket server
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, {
-  pingTimeout: 60000,
+  pingTimeout: 1000,
+  pingInterval: 2000,
   cors: {
     origin: process.env.CORS_ORIGIN, // Secure for production
     credentials: true,
@@ -29,7 +30,7 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
-app.use(morgan("dev")); // Logger
+// app.use(morgan("dev")); // Logger
 
 // Routes
 app.use("/", userRoutes, chatRoutes, messageRoutes);

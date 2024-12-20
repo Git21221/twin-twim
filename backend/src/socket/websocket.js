@@ -6,6 +6,11 @@ import cookie from "cookie";
 
 const onlineUsers = {};
 
+const createOnlineUsersEvent = (socket, io) => {
+  socket.emit(SOCKET_EVENTS.ONLINE_USERS, Object.keys(onlineUsers));
+  io.emit(SOCKET_EVENTS.ONLINE_USERS, Object.keys(onlineUsers));
+};
+
 const createChatEvent = (socket) => {
   socket.on(SOCKET_EVENTS.CHAT, (chatId) => {
     console.log(
@@ -18,6 +23,7 @@ const createChatEvent = (socket) => {
 
 const createUserTyping = (socket) => {
   socket.on(SOCKET_EVENTS.TYPING, (chatId) => {
+    console.log("user is typing");
     socket.in(chatId).emit(SOCKET_EVENTS.TYPING, chatId);
   });
 };
@@ -28,19 +34,13 @@ const createUserStoppedTyping = (socket) => {
   });
 };
 
-const createUserDisconnected = (socket) => {
+const createUserDisconnected = (socket, io) => {
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
     console.log("user disconnected");
     if (socket?.user?._id.toString()) {
       socket.leave(socket.user._id.toString());
       delete onlineUsers[socket.user._id.toString()];
-      socket.emit(
-        SOCKET_EVENTS.DISCONNECT,
-        {
-          userId: socket.user._id.toString(),
-          status: "offline",
-        }
-      );
+      io.emit(SOCKET_EVENTS.ONLINE_USERS, Object.keys(onlineUsers));
     }
   });
 };
@@ -64,17 +64,11 @@ export const connectSocket = (io) => {
     socket.emit(SOCKET_EVENTS.CONNECTED);
     console.log("User connected:", user._id.toString());
     onlineUsers[user._id.toString()] = socket.id;
-    socket.emit(
-      SOCKET_EVENTS.CONNECTED,
-      {
-        userId: user._id.toString(),
-        status: "online",
-      }
-    );
     createChatEvent(socket);
     createUserTyping(socket);
+    createOnlineUsersEvent(socket, io);
     createUserStoppedTyping(socket);
-    createUserDisconnected(socket);
+    createUserDisconnected(socket, io);
   });
 };
 

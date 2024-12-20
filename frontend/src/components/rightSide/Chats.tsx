@@ -28,7 +28,6 @@ export function Chats({ chatId }: ChatsProps) {
   const { messages, loading } = useSelector((state: any) => state.chat);
   const { profile } = useSelector((state: any) => state.users);
   const { socket } = useSocket(); // Use the WebSocket instance from Context
-
   const [page, setPage] = useState(0);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   
@@ -144,24 +143,10 @@ export function Chats({ chatId }: ChatsProps) {
       dispatch(setTyping(false));
     });
 
-    //listen for user connected
-    socket.on("connected", (data) => {
-      console.log("User connected", data);
-      dispatch(setIsOnline(data.status === "online"));
-    });
-
-    //listen for user disconnected
-    socket.on("disconnected", (data) => {
-      console.log("User disconnected");
-      dispatch(setIsOnline(data.status === "online"));
-    });
-
     return () => {
       socket.off("message");
       socket.off("typing");
       socket.off("stoppedTyping");
-      socket.off("connected");
-      socket.off("disconnected");
     };
   }, [chatId, socket, dispatch]);
 

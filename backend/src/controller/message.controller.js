@@ -68,7 +68,6 @@ export const sendMessage = asyncFuncHandler(async (req, res) => {
   const receivedMessage = messages[0];
 
   updatedChat.participants.forEach((participantId) => {
-    console.log(participantId.toString(), " and ", req.user._id.toString());
     if (participantId.toString() === req.user._id.toString()) return;
     emitSocketEvent(req, participantId.toString(), "message", receivedMessage);
   });
@@ -132,7 +131,6 @@ export const getLastMessage = asyncFuncHandler(async (req, res) => {
   if (!lastMessage) {
     return res.status(404).json(new apiErrorHandler(404, "Chat not found"));
   }
-  console.log(lastMessage);
   return res
     .status(200)
     .json(new apiResponseHandler(200, "Last message", lastMessage));

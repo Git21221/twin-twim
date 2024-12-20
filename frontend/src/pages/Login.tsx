@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useDispatch, useSelector } from "react-redux";
-import { startLoading, login, loginFailure } from "../slices/authSlice";
-import { Navigate, useNavigate } from "react-router-dom";
+import { startLoading, loginFailure } from "../slices/authSlice";
+import { Navigate } from "react-router-dom";
 
 const Login = () => {
   const { isAuthenticated, loading } = useSelector((state: any) => state.auth);
@@ -23,7 +23,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +53,8 @@ const Login = () => {
       }
 
       const data = await response.json();
-      if (data.statusCode === 200) {
-        dispatch(login({ isAuthenticated: true, user: data.data })); // Save user data in Redux
-        localStorage.setItem("loggedInUser", JSON.stringify(data.data)); // Save user data in local storage
-        console.log("Login successful:", data);
-        navigate("/", { state: { message: "Welcome back!" } }); // Redirect to home page
+      if(data){
+        window.location.reload();
       }
     } catch (err: any) {
       setError(err.message || "Unexpected error occurred.");

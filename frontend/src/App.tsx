@@ -12,6 +12,7 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/hii" element={<>Hii</>} />
       <Route path="/" element={<Validate />}>
         <Route
           path="/login"

@@ -7,32 +7,44 @@ import { Chats, EmptyChat } from "../components/rightSide/Chats.tsx";
 import { useEffect, useState } from "react";
 import Profiletop from "../components/rightSide/Profiletop.tsx";
 import InputAndReaction from "../components/rightSide/InputAndReaction.tsx";
-import { AppDispatch } from "../store/store.ts";
-import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../context/SocketContext.tsx";
-import { setIsOnline } from "../slices/ChatSlice.ts";
+import { setOnlineUsers } from "../slices/availableUserSlice.ts";
+import { AppDispatch, RootState } from "../store/store.ts";
+import { useDispatch, useSelector } from "react-redux";
 
 const Home = () => {
-  const [emptyChat, setEmptyChat] = useState(true);
-  const [personToChat, setPersonToChat] = useState("");
-  const [chatId, setChatId] = useState("");
+  const [emptyChat, setEmptyChat] = useState<boolean>(true);
+  const [personToChat, setPersonToChat] = useState<string>("");
+  const [chatId, setChatId] = useState<string>("");
+  const { onlineUsers } = useSelector(
+    (state: RootState) => state.availableUser
+  );
   const dispatch = useDispatch<AppDispatch>();
-  const {socket} = useSocket();
-  const {isOnline} = useSelector((state: any) => state.chat);
-  console.log(isOnline);
+  const { socket } = useSocket();
+  console.log("Online users", onlineUsers);
+  console.log("Socket", socket);
+
   useEffect(() => {
-    socket?.on("connected", (data) => {
-      console.log(data.userId === chatId);
-      dispatch(setIsOnline(data?.status === "online"));
+    if (!socket) {
+      console.log("Socket not available");
+      return;
+    }
+    console.log(socket);
+    socket?.on("connected", () => {
+      console.log("Connected to server");
     });
-    socket?.on("disconnected", (data) => {
-      dispatch(setIsOnline(data?.status === "online"));
+    socket?.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+    socket?.on("online", (data) => {
+      dispatch(setOnlineUsers(data));
     });
     return () => {
+      socket?.off("online");
       socket?.off("connected");
-      socket?.off("disconnected");
+      socket?.off("disconnect");
     };
-  }, [chatId, dispatch]);
+  }, [socket]);
 
   return (
     <>

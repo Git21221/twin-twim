@@ -4,7 +4,6 @@ import socketio from "socket.io-client";
 
 const getSocket = () => {
   const accessToken = Cookies.get("accessToken");
-  console.log(accessToken);
 
   if(!accessToken) {
     return null;

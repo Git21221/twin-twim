@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
 import { setIsOnline } from "../../slices/ChatSlice";
 import { useSocket } from "../../context/SocketContext";
+import { DisabledByDefault } from "@mui/icons-material";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,8 +28,8 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     (state: RootState) => state.users
   );
   const dispatch = useDispatch<AppDispatch>();
+  const {onlineUsers} = useSelector((state: RootState) => state.availableUser);
   const navigate = useNavigate();
-  const {socket} = useSocket();
   const [id, setId] = React.useState("");
 
   // Fetch profile only if it's not available or we are in error state
@@ -36,12 +37,6 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     try {
       dispatch(fetchUserProfile());
       dispatch(fetchAvailableUsers());
-      socket?.on("connected", (data) => {
-        dispatch(setIsOnline(data?.status === "online"));
-      })
-      socket?.on("disconnected", (data) => {
-        dispatch(setIsOnline(data?.status === "online"));
-      });
       // dispatch(getLastMessage(chatId));
     } catch (error: any) {
       console.log(error.message);
@@ -51,9 +46,7 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     }
   }, [dispatch]);
 
-  const handleChatClick = async (id: string, name: string) => {
-    console.log(name);
-    
+  const handleChatClick = async (id: string) => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/twims/${id}`,
@@ -71,8 +64,8 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
       if (data.message == "Chat created") {
         setChatId(data?.data[0]?._id);
         setId(data?.data[0]?._id);
+        dispatch(setIsOnline(true));
       } else {
-        // navigate(`/chat/${data.data?._id}/${name}`);
         setChatId(data?.data?._id);
         setId(data?.data?._id);
       }
@@ -111,7 +104,7 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                       <p
                         className="text-[15px] font-medium"
                         onClick={() =>
-                          handleChatClick(user._id, user.firstName)
+                          handleChatClick(user._id)
                         }
                       >
                         {user.firstName} {user.lastName}

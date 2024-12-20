@@ -193,7 +193,6 @@ const getOtherUserProfile = asyncFuncHandler(async (req, res) => {
 
 const auth = asyncFuncHandler(async (req, res) => {
   const token = req?.cookies?.accessToken;
-  console.log("token",token);
   //check if token is valid
   if (!token)
     return res.status(401).json(new apiErrorHandler(401, "Token required"));

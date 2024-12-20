@@ -92,7 +92,6 @@ const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
       )
     )?.lastMessage[0];
   });
-  console.log("chats", chats);
 
   //if available send the list of twims
   if (twims.length !== 0) {
@@ -104,7 +103,6 @@ const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
 
 const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
   const { personToChatId } = req?.params;
-  console.log(personToChatId);
   //check if the user exists
   const receiver = await User.findById(personToChatId);
 
@@ -176,7 +174,6 @@ const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
   }
 
   data?.participants?.forEach((participant) => {
-    console.log(participant._id?.toString());
     if (participant._id.toString() === req.user._id.toString()) return;
     emitSocketEvent(req, participant._id?.toString(), "newChat", newChat);
   });

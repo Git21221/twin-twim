@@ -8,10 +8,10 @@ import { SocketProvider } from "./context/SocketContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-      <Router>
     <SocketProvider>
+      <Router>
         <App />
-    </SocketProvider>
       </Router>
+    </SocketProvider>
   </Provider>
 );
