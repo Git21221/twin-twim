@@ -33,6 +33,9 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 // app.use(morgan("dev")); // Logger
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 app.use("/", userRoutes, chatRoutes, messageRoutes);
 
 connectSocket(io);
