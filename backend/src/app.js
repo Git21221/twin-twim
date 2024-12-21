@@ -27,22 +27,6 @@ export const io = new Server(httpServer, {
   },
 });
 
-// Attach io to Express app for access in routes
-app.set("io", io);
-
-// Middleware
-app.use(cookieParser());
-app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
-// app.use(morgan("dev")); // Logger
-
-// Routes
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-app.use("/", userRoutes, chatRoutes, messageRoutes);
-
-// connectSocket(io);
 io.on("connection", async (socket) => {
   console.log("A user connected");
   const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
@@ -68,3 +52,18 @@ io.on("connection", async (socket) => {
   createUserStoppedTyping(socket);
   createUserDisconnected(socket, io);
 });
+
+// Attach io to Express app for access in routes
+// app.set("io", io);
+
+// Middleware
+app.use(cookieParser());
+app.use(express.json());
+app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+// app.use(morgan("dev")); // Logger
+
+// Routes
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+app.use("/", userRoutes, chatRoutes, messageRoutes);
