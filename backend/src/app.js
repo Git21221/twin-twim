@@ -5,14 +5,22 @@ import { userRoutes } from "./route/user.route.js";
 import { chatRoutes } from "./route/chat.route.js";
 import cookieParser from "cookie-parser";
 import { createServer } from "http";
-import {Server} from "socket.io";
+import { Server } from "socket.io";
 import morgan from "morgan";
 import { messageRoutes } from "./route/message.route.js";
-import { createChatEvent, createOnlineUsersEvent, createUserDisconnected, createUserStoppedTyping, createUserTyping, onlineUsers } from "./socket/websocket.js";
+import {
+  createChatEvent,
+  createOnlineUsersEvent,
+  createUserDisconnected,
+  createUserStoppedTyping,
+  createUserTyping,
+  onlineUsers,
+} from "./socket/websocket.js";
 import { User } from "./model/user.model.js";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 import { SOCKET_EVENTS } from "../socketEvents.constants.js";
+import path from "path";
 
 export const app = express();
 
@@ -66,7 +74,6 @@ io.on("connection", async (socket) => {
   }
 });
 
-
 // Attach io to Express app for access in routes
 app.set("io", io);
 
@@ -81,3 +88,10 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 app.use("/", userRoutes, chatRoutes, messageRoutes);
+if (process.env.DEV_ENV === "true") {
+  const __dirname = path.resolve();
+  app.use(express.static("./frontend/dist"));
+  app.use((req, res) =>
+    res.sendFile(path.resolve(__dirname, "./frontend/dist", "index.html"))
+  );
+}
