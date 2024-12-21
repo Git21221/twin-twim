@@ -46,7 +46,7 @@ const createUserDisconnected = (socket, io) => {
 };
 
 export const connectSocket = (io) => {
-  return io.on("connection", async (socket) => {
+  io.on("connection", async (socket) => {
     const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
     let token = cookies.accessToken;
 

@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { io } from "../app.js";
 import { Chat } from "../model/chat.model.js";
 import { User } from "../model/user.model.js";
-import { connectSocket, emitSocketEvent } from "../socket/websocket.js";
+import { emitSocketEvent } from "../socket/websocket.js";
 import { apiErrorHandler } from "../utils/apiErrorHandler.util.js";
 import { apiResponseHandler } from "../utils/apiResponseHandler.util.js";
 import { asyncFuncHandler } from "../utils/asyncFuncHandler.util.js";
