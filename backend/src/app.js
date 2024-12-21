@@ -4,28 +4,28 @@ import "dotenv/config";
 import { userRoutes } from "./route/user.route.js";
 import { chatRoutes } from "./route/chat.route.js";
 import cookieParser from "cookie-parser";
-import { createServer } from "http";
+// import { createServer } from "http";
 import { Server } from "socket.io";
 import morgan from "morgan";
 import { messageRoutes } from "./route/message.route.js";
-import { connectSocket } from "./socket/websocket.js";
+// import { connectSocket } from "./socket/websocket.js";
 
 export const app = express();
 
-// HTTP and WebSocket server
-export const httpServer = createServer(app);
-export const io = new Server(httpServer, {
-  pingTimeout: 1000,
-  pingInterval: 2000,
-  cors: {
-    origin: process.env.CORS_ORIGIN, // Secure for production
-    credentials: true,
-    methods: ["GET", "POST"],
-  },
-});
+// // HTTP and WebSocket server
+// export const httpServer = createServer(app);
+// export const io = new Server(httpServer, {
+//   pingTimeout: 1000,
+//   pingInterval: 2000,
+//   cors: {
+//     origin: process.env.CORS_ORIGIN, // Secure for production
+//     credentials: true,
+//     methods: ["GET", "POST"],
+//   },
+// });
 
-// Attach io to Express app for access in routes
-app.set("io", io);
+// // Attach io to Express app for access in routes
+// app.set("io", io);
 
 // Middleware
 app.use(cookieParser());
@@ -39,4 +39,4 @@ app.get("/", (req, res) => {
 });
 app.use("/", userRoutes, chatRoutes, messageRoutes);
 
-connectSocket(io);
+// connectSocket(io);
