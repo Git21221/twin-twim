@@ -29,6 +29,7 @@ const Home = () => {
       console.log("Socket not available");
       return;
     }
+    console.log("Socket available");
     socket.emit("hii", "Hello from client");
     console.log(socket);
     socket?.on("connected", () => {
