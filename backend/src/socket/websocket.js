@@ -47,31 +47,31 @@ const createUserDisconnected = (socket, io) => {
 
 export const connectSocket = (io) => {
   console.log("Socket.IO connected");
-  io.on("connection", async (socket) => {
+  io.on("connection", (socket) => {
     console.log("inside io");
     
-    const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
-    let token = cookies.accessToken;
+    // const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
+    // let token = cookies.accessToken;
 
-    if (!token) {
-      return new apiErrorHandler(401, "Unauthorized");
-    }
+    // if (!token) {
+    //   return new apiErrorHandler(401, "Unauthorized");
+    // }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
-    const user = await User.findById(decodedToken._id);
-    if (!user) {
-      return new apiErrorHandler(401, "Unauthorized");
-    }
-    socket.user = user;
-    socket.join(user._id.toString());
-    socket.emit(SOCKET_EVENTS.CONNECTED);
-    console.log("User connected:", user._id.toString());
-    onlineUsers[user._id.toString()] = socket.id;
-    createChatEvent(socket);
-    createUserTyping(socket);
-    createOnlineUsersEvent(socket, io);
-    createUserStoppedTyping(socket);
-    createUserDisconnected(socket, io);
+    // const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+    // const user = User.findById(decodedToken._id);
+    // if (!user) {
+    //   return new apiErrorHandler(401, "Unauthorized");
+    // }
+    // socket.user = user;
+    // socket.join(user._id.toString());
+    // socket.emit(SOCKET_EVENTS.CONNECTED);
+    // console.log("User connected:", user._id.toString());
+    // onlineUsers[user._id.toString()] = socket.id;
+    // createChatEvent(socket);
+    // createUserTyping(socket);
+    // createOnlineUsersEvent(socket, io);
+    // createUserStoppedTyping(socket);
+    // createUserDisconnected(socket, io);
   });
 };
 
