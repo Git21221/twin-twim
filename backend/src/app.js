@@ -20,6 +20,7 @@ export const io = new Server(httpServer, {
   cors: {
     origin: process.env.CORS_ORIGIN, // Secure for production
     credentials: true,
+    methods: ["GET", "POST"],
   },
 });
 
