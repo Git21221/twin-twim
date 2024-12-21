@@ -29,10 +29,11 @@ export const io = new Server(httpServer, {
 
 io.on("connection", async (socket) => {
   console.log("A user connected");
+  socket.on("hii", (data) => {
+    console.log(data);
+  });
   try {
     const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
-    console.log("Cookies:", cookies);
-
     let token = cookies.accessToken;
     if (!token) {
       console.error("Missing token");
