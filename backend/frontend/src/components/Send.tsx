@@ -32,7 +32,7 @@ function Send({ chatId }: { chatId: string }) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/messages/${chatId}`,
+        `/api/messages/${chatId}`,
         {
           method: "POST",
           headers: {
