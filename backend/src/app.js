@@ -22,7 +22,8 @@ export const io = new Server(httpServer, {
   pingTimeout: 60000,
   pingInterval: 25000,
   cors: {
-    origin: "*", // Secure for production
+    origin: process.env.CORS_ORIGIN, // Secure for production
+    credentials: true,
     methods: ["GET", "POST"],
   },
 });
