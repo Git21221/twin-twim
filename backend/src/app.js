@@ -5,7 +5,7 @@ import { userRoutes } from "./route/user.route.js";
 import { chatRoutes } from "./route/chat.route.js";
 import cookieParser from "cookie-parser";
 import { createServer } from "http";
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 import morgan from "morgan";
 import { messageRoutes } from "./route/message.route.js";
 import { connectSocket } from "./socket/websocket.js";
@@ -20,12 +20,7 @@ export const io = new Server(httpServer, {
   cors: {
     origin: process.env.CORS_ORIGIN, // Secure for production
     credentials: true,
-    methods: ["GET", "POST"],
   },
-});
-
-io.on("connection", (socket) => {
-  console.log("A user connected");
 });
 
 // Attach io to Express app for access in routes
