@@ -84,8 +84,10 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 // app.use(morgan("dev")); // Logger
 
 app.use("/api", userRoutes, chatRoutes, messageRoutes);
-if (process.env.DEV_ENV === "true") {
+if (process.env.DEV_ENV === "false") {
   const __dirname = path.resolve();
+  console.log(__dirname);
+  
   app.use(express.static("./frontend/dist"));
   app.get("*", (req, res) =>
     res.sendFile(path.resolve(__dirname, "./frontend/dist", "index.html"))
