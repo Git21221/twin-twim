@@ -46,7 +46,7 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   const handleChatClick = async (id: string) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/twims/${id}`,
+        `/api/twims/${id}`,
         {
           method: "POST",
           headers: {
