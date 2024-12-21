@@ -15,7 +15,7 @@ const initialState: AuthStateTypes = {
 };
 
 export const getAuth = createAsyncThunk("auth/getAuth", async () => {
-  const res = await fetch(`${import.meta.env.VITE_BASE_URL}/auth`, {
+  const res = await fetch("/api/auth", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

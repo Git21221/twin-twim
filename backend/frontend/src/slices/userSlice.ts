@@ -45,7 +45,7 @@ export const fetchAvailableUsers = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchAvailableUsers", async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/twims`, {
+    const response = await fetch(`/api/twims`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -71,7 +71,7 @@ export const fetchUserProfile = createAsyncThunk<
   { rejectValue: string }
 >("users/fetchUserProfile", async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/me`, {
+    const response = await fetch(`/api/me`, {
       method: "GET",
       credentials: "include",
     });
@@ -94,7 +94,7 @@ export const fetchUserById = createAsyncThunk<
 >("user/fetchUserById", async (userId, { rejectWithValue }) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/user/${userId}`,
+      `/api/user/${userId}`,
       {
         method: "GET",
         credentials: "include",

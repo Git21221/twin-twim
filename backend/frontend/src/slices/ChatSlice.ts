@@ -36,7 +36,7 @@ export const getAllChats = createAsyncThunk<ChatMessage[], Props, { rejectValue:
   async ({chatId, page, limit}, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/messages/${chatId}?page=${page}&limit=${limit}`,
+        `/api/messages/${chatId}?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -62,7 +62,7 @@ export const getLastMessage = createAsyncThunk<ChatMessage, string, { rejectValu
   async (chatId, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/last-message/${chatId}`,
+        `/api/last-message/${chatId}`,
         {
           method: "GET",
           headers: {
