@@ -13,13 +13,13 @@ function App() {
   return (
     <Routes>
       <Route path="/hii" element={<>Hii</>} />
+      <Route path="/" element={<Validate />}>
         <Route
           path="/login"
           element={
             !isAuthenticated ? <Login /> : <Navigate to="/home" replace />
           }
         />
-      <Route path="/" element={<Validate />}>
         <Route element={<PrivateRoute />}>
           <Route
             path="/home"
