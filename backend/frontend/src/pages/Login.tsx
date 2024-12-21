@@ -15,10 +15,10 @@ import {
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useDispatch, useSelector } from "react-redux";
 import { startLoading, loginFailure } from "../slices/authSlice";
-import { Navigate } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
 
 const Login = () => {
-  const { isAuthenticated, loading } = useSelector((state: any) => state.auth);
+  const { loading } = useSelector((state: any) => state.auth);
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -62,9 +62,9 @@ const Login = () => {
     }
   };
 
-  if (isAuthenticated) {
-    return <Navigate to="/" />;
-  }
+  // if (isAuthenticated) {
+  //   return <Navigate to="/" />;
+  // }
 
   return (
     <Container
