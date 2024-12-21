@@ -19,8 +19,8 @@ export const app = express();
 // HTTP and WebSocket server
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, {
-  pingTimeout: 1000,
-  pingInterval: 2000,
+  pingTimeout: 60000,
+  pingInterval: 25000,
   cors: {
     origin: "*", // Secure for production
     methods: ["GET", "POST"],
@@ -29,32 +29,44 @@ export const io = new Server(httpServer, {
 
 io.on("connection", async (socket) => {
   console.log("A user connected");
-  const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
-  let token = cookies.accessToken;
+  try {
+    const cookies = cookie.parse(socket?.handshake?.headers?.cookie || "");
+    console.log("Cookies:", cookies);
 
-  if (!token) {
-    return new apiErrorHandler(401, "Unauthorized");
-  }
+    let token = cookies.accessToken;
+    if (!token) {
+      console.error("Missing token");
+      return socket.disconnect(true);
+    }
 
-  const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
-  const user = await User.findById(decodedToken._id);
-  if (!user) {
-    return new apiErrorHandler(401, "Unauthorized");
+    const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decodedToken._id);
+    if (!user) {
+      console.error("User not found");
+      return socket.disconnect(true);
+    }
+
+    console.log("User authenticated:", user._id.toString());
+    socket.user = user;
+    socket.join(user._id.toString());
+
+    socket.emit(SOCKET_EVENTS.CONNECTED);
+    onlineUsers[user._id.toString()] = socket.id;
+
+    createChatEvent(socket);
+    createUserTyping(socket);
+    createOnlineUsersEvent(socket, io);
+    createUserStoppedTyping(socket);
+    createUserDisconnected(socket, io);
+  } catch (err) {
+    console.error("Error during connection:", err.message);
+    return socket.disconnect(true);
   }
-  socket.user = user;
-  socket.join(user._id.toString());
-  socket.emit(SOCKET_EVENTS.CONNECTED);
-  console.log("User connected:", user._id.toString());
-  onlineUsers[user._id.toString()] = socket.id;
-  createChatEvent(socket);
-  createUserTyping(socket);
-  createOnlineUsersEvent(socket, io);
-  createUserStoppedTyping(socket);
-  createUserDisconnected(socket, io);
 });
 
+
 // Attach io to Express app for access in routes
-// app.set("io", io);
+app.set("io", io);
 
 // Middleware
 app.use(cookieParser());
