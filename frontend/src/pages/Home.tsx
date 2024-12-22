@@ -9,8 +9,8 @@ import Profiletop from "../components/rightSide/Profiletop.tsx";
 import InputAndReaction from "../components/rightSide/InputAndReaction.tsx";
 import { useSocket } from "../context/SocketContext.tsx";
 import { setOnlineUsers } from "../slices/availableUserSlice.ts";
-import { AppDispatch, RootState } from "../store/store.ts";
-import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../store/store.ts";
+import { useDispatch } from "react-redux";
 
 const Home = () => {
   const [emptyChat, setEmptyChat] = useState<boolean>(true);
