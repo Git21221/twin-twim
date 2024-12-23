@@ -61,7 +61,11 @@ const Home = () => {
         </div>
         <div className="chatInterface absolute flex bg-[var(--main-chat-background-color)] left-[56px] h-[calc(100vh-50px)] w-[calc(100vw-56px)] rounded-tl-[20px]">
           <div className="leftSide w-[350px]">
-            <Searchbar />
+            <Searchbar
+            setEmptyChat={setEmptyChat}
+            setPersonToChat={setPersonToChat}
+            setChatId={setChatId}
+            />
             <AvailableUserChat
               setEmptyChat={setEmptyChat}
               setPersonToChat={setPersonToChat}
@@ -71,9 +75,9 @@ const Home = () => {
             <Profile />
           </div>
           <div className="rightSide">
-            {emptyChat ? "" : <Profiletop personToChat={personToChat} />}
+            {emptyChat ? "" : <Profiletop personToChat={personToChat} chatId={chatId} />}
             {emptyChat ? <EmptyChat /> : <Chats chatId={chatId} />}
-            {emptyChat ? "" : <InputAndReaction chatId={chatId} />}
+            {emptyChat ? "" : <InputAndReaction chatId={chatId} personToChat={personToChat} />}
           </div>
         </div>
       </div>

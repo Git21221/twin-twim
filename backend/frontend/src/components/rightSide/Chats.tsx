@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppDispatch } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage, getAllChats, resetMessages, setTyping } from "../../slices/ChatSlice";
+import {
+  addMessage,
+  getAllChats,
+  resetMessages,
+  setTyping,
+} from "../../slices/ChatSlice";
 import { useSocket } from "../../context/SocketContext";
 // import { parse } from "cookie";
 
@@ -30,7 +35,7 @@ export function Chats({ chatId }: ChatsProps) {
   const { socket } = useSocket(); // Use the WebSocket instance from Context
   const [page, setPage] = useState(0);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  
+
   // Utility to determine message date label
   const getDateLabel = (messageDate: string) => {
     const messageTime = new Date(messageDate);
@@ -74,7 +79,8 @@ export function Chats({ chatId }: ChatsProps) {
   // Scroll to bottom on message update
   useEffect(() => {
     if (chatContainerRef.current && page === 0) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -112,7 +118,8 @@ export function Chats({ chatId }: ChatsProps) {
     dispatch(getAllChats({ chatId, page: 0, limit: 10 }));
 
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [chatId, dispatch]);
 
@@ -128,19 +135,22 @@ export function Chats({ chatId }: ChatsProps) {
       if (message.chat === chatId) {
         dispatch(addMessage(message));
         if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
         }
       }
     });
 
     // Listen for typing events
-    socket.on("typing", () => {
-      dispatch(setTyping(true));
+    socket.on("typing", (e) => {
+      console.log("Typing event", e);
+
+      dispatch(setTyping({ _id: e, isTyping: true }));
     });
 
     // Listen for stopped typing events
-    socket.on("stoppedTyping", () => {
-      dispatch(setTyping(false));
+    socket.on("stoppedTyping", (e) => {
+      dispatch(setTyping({ _id: e, isTyping: false }));
     });
 
     return () => {
@@ -160,7 +170,9 @@ export function Chats({ chatId }: ChatsProps) {
         {Object.keys(groupedMessages).map((dateLabel) => (
           <div key={dateLabel}>
             {/* Date label */}
-            <div className="text-center bg-[--chat-active-color] my-4 mx-auto w-fit p-2 rounded-md">{dateLabel}</div>
+            <div className="text-center bg-[--chat-active-color] my-4 mx-auto w-fit p-2 rounded-md">
+              {dateLabel}
+            </div>
             {/* Messages for this date */}
             {groupedMessages[dateLabel].map((message: Message, i: any) => (
               <div
@@ -194,7 +206,9 @@ export function Chats({ chatId }: ChatsProps) {
           </div>
         ))}
         {messages.length === 0 && (
-          <p className="text-center text-gray-500">No messages yet. Start the conversation!</p>
+          <p className="text-center text-gray-500">
+            No messages yet. Start the conversation!
+          </p>
         )}
       </div>
     </div>

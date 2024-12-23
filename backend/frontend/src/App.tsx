@@ -6,6 +6,7 @@ import { RootState } from "./store/store";
 import { useSelector } from "react-redux";
 import Login from "./pages/Login";
 import Validate from "./pages/Validate";
+import Register from "./pages/Register";
 
 function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -13,6 +14,7 @@ function App() {
   return (
     <Routes>
       <Route path="/hii" element={<>Hii</>} />
+      <Route path="/register" element={<Register/>} />
       <Route path="/" element={<Validate />}>
         <Route
           path="/login"

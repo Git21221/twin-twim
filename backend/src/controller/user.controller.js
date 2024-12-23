@@ -7,7 +7,6 @@ import {
   accessTokenOptions,
   refreshTokenOptions,
 } from "../utils/refreshAccessToken.util.js";
-import { verifyJWT } from "../middleware/auth.middleware.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 

@@ -22,15 +22,15 @@ export const createChatEvent = (socket) => {
 };
 
 export const createUserTyping = (socket) => {
-  socket.on(SOCKET_EVENTS.TYPING, (chatId) => {
+  socket.on(SOCKET_EVENTS.TYPING, ({chatId, senderId, receiverId}) => {
     console.log("user is typing");
-    socket.in(chatId).emit(SOCKET_EVENTS.TYPING, chatId);
+    socket.to(receiverId).emit(SOCKET_EVENTS.TYPING, {chatId, senderId, receiverId});
   });
 };
 
 export const createUserStoppedTyping = (socket) => {
-  socket.on(SOCKET_EVENTS.STOPPED_TYPING, (chatId) => {
-    socket.in(chatId).emit(SOCKET_EVENTS.STOPPED_TYPING, chatId);
+  socket.on(SOCKET_EVENTS.STOPPED_TYPING, ({chatId, senderId, receiverId}) => {
+    socket.to(receiverId).emit(SOCKET_EVENTS.STOPPED_TYPING, {chatId, senderId, receiverId});
   });
 };
 

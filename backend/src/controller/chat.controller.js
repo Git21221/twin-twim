@@ -47,7 +47,7 @@ const chatCommonAggregation = () => {
   ];
 };
 
-const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
+export const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
   //search for available twims
   const twims = await User.aggregate([
     {
@@ -100,7 +100,7 @@ const searchAvailabletwims = asyncFuncHandler(async (req, res) => {
   }
 });
 
-const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
+export const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
   const { personToChatId } = req?.params;
   //check if the user exists
   const receiver = await User.findById(personToChatId);
@@ -181,4 +181,78 @@ const createOneOnOneChat = asyncFuncHandler(async (req, res) => {
     .json(new apiResponseHandler(200, "Chat created", createNewChat));
 });
 
-export { searchAvailabletwims, createOneOnOneChat };
+export const searchAvailableTwimToChat = asyncFuncHandler(async (req, res) => {
+  const { username } = req?.params;
+  const twim = await User.findOne({ username });
+  if (!twim) {
+    return res.status(404).json(new apiErrorHandler(404, "User not found"));
+  }
+  return res
+    .status(200)
+    .json(new apiResponseHandler(200, "Chat created", twim));
+});
+
+export const searchAvailableTwimWithChat = asyncFuncHandler(
+  async (req, res) => {
+    // Fetch all twims except the current user
+    const twims = await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $ne: req.user._id,
+          },
+        },
+      },
+      {
+        $project: {
+          username: 1,
+          email: 1,
+          firstName: 1,
+          lastName: 1,
+        },
+      },
+    ]);
+
+    // Fetch all chats of the current user
+    const chats = await Chat.aggregate([
+      {
+        $match: {
+          participants: {
+            $elemMatch: { $eq: req.user._id },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "messages",
+          localField: "lastMessage",
+          foreignField: "_id",
+          as: "lastMessage",
+        },
+      },
+    ]);
+
+    // Attach the last message only to twims with an associated chat
+    const twimsWithChats = twims.map((twim) => {
+      const chat = chats.find((chat) =>
+        chat.participants.some(
+          (participant) => participant.toString() === twim._id.toString()
+        )
+      );
+      if (chat) {
+        twim.lastMessage = chat.lastMessage?.[0]; // Attach the last message
+        return twim; // Include only twims with chats
+      }
+      return null;
+    }).filter(Boolean); // Remove null values (twims without chats)
+
+    // If twims with chats exist, return them
+    if (twimsWithChats.length > 0) {
+      res
+        .status(200)
+        .json(new apiResponseHandler(200, "twims fetched", twimsWithChats));
+    } else {
+      res.status(404).json(new apiErrorHandler(404, "No twims with chats available"));
+    }
+  }
+);
