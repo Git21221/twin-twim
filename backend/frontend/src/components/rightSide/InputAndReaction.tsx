@@ -21,7 +21,7 @@ function InputAndReaction({chatId, personToChat}: {chatId: string, personToChat:
           <Input chatId={chatId} personToChat={personToChat} />
         </div>
         <div className="mic flex items-center aspect-square rounded-md hover:bg-[--chat-hover-color]">
-          {newMessage ? <Send chatId={chatId}  /> : <Mic />}
+          {newMessage ? <Send chatId={chatId} personToChat={personToChat} /> : <Mic />}
         </div>
       </div>
     </div>

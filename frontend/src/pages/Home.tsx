@@ -9,52 +9,44 @@ import Profiletop from "../components/rightSide/Profiletop.tsx";
 import InputAndReaction from "../components/rightSide/InputAndReaction.tsx";
 import { useSocket } from "../context/SocketContext.tsx";
 import { setOnlineUsers } from "../slices/availableUserSlice.ts";
-import { AppDispatch } from "../store/store.ts";
-import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../store/store.ts";
+import { useDispatch, useSelector } from "react-redux";
 
 const Home = () => {
   const [emptyChat, setEmptyChat] = useState<boolean>(true);
   const [personToChat, setPersonToChat] = useState<string>("");
   const [chatId, setChatId] = useState<string>("");
+  const { onlineUsers } = useSelector(
+    (state: RootState) => state.availableUser
+  );
   const dispatch = useDispatch<AppDispatch>();
   const { socket } = useSocket();
+  console.log("Online users", onlineUsers);
+  console.log("Socket", socket);
 
   useEffect(() => {
     if (!socket) {
       console.log("Socket not available");
       return;
     }
-
     console.log("Socket available");
-
-    // Emit an event when the socket is available
-    
-    // Add event listeners
-    const handleConnect = () => {
+    socket.emit("hii", "Hello from client");
+    console.log(socket);
+    socket?.on("connected", () => {
       console.log("Connected to server");
-      socket.emit("hii", "Hello from client");
-    };
-
-    const handleDisconnect = () => {
+    });
+    socket?.on("disconnect", () => {
       console.log("Disconnected from server");
-    };
-
-    const handleOnline = (data: any) => {
-      console.log("Online users:", data);
+    });
+    socket?.on("online", (data) => {
       dispatch(setOnlineUsers(data));
-    };
-
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("online", handleOnline);
-
-    // Cleanup function to remove event listeners
+    });
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("online", handleOnline);
+      socket?.off("online");
+      socket?.off("connected");
+      socket?.off("disconnect");
     };
-  }, [socket, dispatch]); // Ensure `dispatch` is added to dependencies
+  }, [socket]);
 
   return (
     <>
@@ -69,7 +61,11 @@ const Home = () => {
         </div>
         <div className="chatInterface absolute flex bg-[var(--main-chat-background-color)] left-[56px] h-[calc(100vh-50px)] w-[calc(100vw-56px)] rounded-tl-[20px]">
           <div className="leftSide w-[350px]">
-            <Searchbar />
+            <Searchbar
+            setEmptyChat={setEmptyChat}
+            setPersonToChat={setPersonToChat}
+            setChatId={setChatId}
+            />
             <AvailableUserChat
               setEmptyChat={setEmptyChat}
               setPersonToChat={setPersonToChat}
@@ -79,9 +75,9 @@ const Home = () => {
             <Profile />
           </div>
           <div className="rightSide">
-            {emptyChat ? "" : <Profiletop personToChat={personToChat} />}
+            {emptyChat ? "" : <Profiletop personToChat={personToChat} chatId={chatId} />}
             {emptyChat ? <EmptyChat /> : <Chats chatId={chatId} />}
-            {emptyChat ? "" : <InputAndReaction chatId={chatId} />}
+            {emptyChat ? "" : <InputAndReaction chatId={chatId} personToChat={personToChat} />}
           </div>
         </div>
       </div>

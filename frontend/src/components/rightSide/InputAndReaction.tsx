@@ -6,7 +6,7 @@ import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 import Send from "../Send";
 
-function InputAndReaction({chatId}: {chatId: string}) {
+function InputAndReaction({chatId, personToChat}: {chatId: string, personToChat: string}) {
   const { newMessage } = useSelector((state: RootState) => state.message);
   return (
     <div className="border-t border-l border-[--main-background-color]">
@@ -18,10 +18,10 @@ function InputAndReaction({chatId}: {chatId: string}) {
           <Attachment />
         </div>
         <div className="input w-[-webkit-fill-available]">
-          <Input chatId={chatId} />
+          <Input chatId={chatId} personToChat={personToChat} />
         </div>
         <div className="mic flex items-center aspect-square rounded-md hover:bg-[--chat-hover-color]">
-          {newMessage ? <Send chatId={chatId} /> : <Mic />}
+          {newMessage ? <Send chatId={chatId}  /> : <Mic />}
         </div>
       </div>
     </div>

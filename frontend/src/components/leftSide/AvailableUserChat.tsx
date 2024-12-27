@@ -1,9 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
-import { fetchAvailableUsers, fetchUserProfile } from "../../slices/userSlice";
+import {
+  fetchAvailableUsersWithChat,
+  fetchUserProfile,
+  setUser,
+} from "../../slices/userSlice";
 import { setIsOnline } from "../../slices/ChatSlice";
+import { useSocket } from "../../context/SocketContext";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,49 +21,110 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
   setEmptyChat,
   setPersonToChat,
   setChatId,
-}: {
-  setEmptyChat: any;
-  setPersonToChat: any;
-  setChatId: any;
-  chatId: string;
 }) => {
-  const { users, error } = useSelector(
-    (state: RootState) => state.users
-  );
+  const { users, error } = useSelector((state: RootState) => state.users);
+  interface TypingState {
+    isTyping: boolean;
+    senderId: string;
+    receiverId: string;
+    chatId: string;
+  }
+
+  const [typing, setTyping] = useState<TypingState>({
+    isTyping: false,
+    senderId: "",
+    receiverId: "",
+    chatId: "",
+  });
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const [id, setId] = React.useState("");
+  const [sortedUsers, setSortedUsers] = useState<any[]>([]); // To hold sorted users
+  const [id, setId] = useState<string>("");
+  const { socket } = useSocket();
 
-  // Fetch profile only if it's not available or we are in error state
+  // Fetch user data and profile on mount
   useEffect(() => {
     try {
       dispatch(fetchUserProfile());
-      dispatch(fetchAvailableUsers());
-      // dispatch(getLastMessage(chatId));
+      dispatch(fetchAvailableUsersWithChat());
     } catch (error: any) {
       console.log(error.message);
       if (error.message === "Unauthorized") {
         navigate("/login");
       }
     }
-  }, [dispatch]);
+  }, [dispatch, navigate]);
+
+  // Sort users by lastMessage date
+  useEffect(() => {
+    const sorted = [...users].sort((a, b) => {
+      const dateA = a?.lastMessage?.createdAt
+        ? new Date(a.lastMessage.createdAt).getTime()
+        : 0;
+      const dateB = b?.lastMessage?.createdAt
+        ? new Date(b.lastMessage.createdAt).getTime()
+        : 0;
+      return dateB - dateA;
+    });
+    setSortedUsers(sorted);
+  }, [users]);
+
+  // Handle new message event
+  useEffect(() => {
+    const handleNewMessage = (newMessage: any) => {
+      // Dispatch the setUser action to update the Redux state
+      if (newMessage?.sender?._id) {
+        dispatch(
+          setUser({
+            _id: newMessage.sender._id,
+            firstName: newMessage.sender.firstName,
+            lastName: newMessage.sender.lastName,
+            lastMessage: {
+              id: newMessage._id,
+              sender: newMessage.sender._id,
+              content: newMessage.content,
+              createdAt: newMessage.createdAt,
+            },
+          })
+        );
+      }
+    };
+
+    // Listen for the message event on the WebSocket
+    const messageEvent = (event: any) => {
+      console.log("New message received:", event);
+      handleNewMessage(event);
+    };
+
+    socket?.on("message", messageEvent);
+
+    socket?.on("typing", (data: any) => {
+      console.log("Typing event received:", data);
+      setTyping({...data, isTyping: true});
+    });
+    socket?.on("stoppedTyping", (data: any) => {
+      console.log("Stopped typing event received:", data);
+      setTyping({...data, isTyping: false});
+    });
+
+    return () => {
+      socket?.off("message", messageEvent);
+    };
+  }, [dispatch, socket]);
 
   const handleChatClick = async (id: string) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/twims/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ to: id }),
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`/api/twims/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ to: id }),
+        credentials: "include",
+      });
 
       const data = await response.json();
-      if (data.message == "Chat created") {
+      if (data.message === "Chat created") {
         setChatId(data?.data[0]?._id);
         setId(data?.data[0]?._id);
         dispatch(setIsOnline(true));
@@ -73,19 +139,18 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
     }
   };
 
-  // Loading state
-  // if (loading) return <p>Loading...</p>;
-
   return (
     <div className="overflow-y-auto max-w-[350px] h-[calc(100vh-207px)]">
-      {users?.length > 0 ? (
+      {sortedUsers?.length > 0 ? (
         <>
           {error ? (
-            <p>{error}</p> // Show error message if any
-          ) : users?.length > 0 ? (
-            users.map((user: any) => (
+            <p>{error}</p>
+          ) : (
+            sortedUsers.map((user: any) => (
+              console.log(user),
               <div
                 key={user._id}
+                onClick={() => handleChatClick(user._id)}
                 className={`max-w-[338px] p-4 hover:bg-[--chat-hover-color] m-[6px] rounded-lg ${
                   id === user?.lastMessage?.chat
                     ? "bg-[--chat-active-color]"
@@ -98,12 +163,7 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                   </div>
                   <div className="flex flex-col w-full">
                     <div className="flex justify-between items-center">
-                      <p
-                        className="text-[15px] font-medium"
-                        onClick={() =>
-                          handleChatClick(user._id)
-                        }
-                      >
+                      <p className="text-[15px] font-medium">
                         {user.firstName} {user.lastName}
                       </p>
                       <div className="time text-sm font-light">
@@ -120,8 +180,17 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-light break-words line-clamp-1 max-w-[220px]">
-                        {user.lastMessage ? user.lastMessage.content : ""}
+                        {typing && typing?.senderId === user._id && typing.isTyping ? (
+                          <span className="text-[--highlighted-color]">
+                            typing...
+                          </span>
+                        ) : user.lastMessage?.content ? (
+                          user.lastMessage.content
+                        ) : (
+                          <span className="text-gray-500">No messages yet</span>
+                        )}
                       </span>
+
                       <span className="count bg-[--highlighted-color] rounded-full text-[--main-chat-text-color] flex items-center justify-center text-sm font-semibold px-[6px]">
                         5
                       </span>
@@ -130,8 +199,6 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                 </div>
               </div>
             ))
-          ) : (
-            <p>No available users.</p>
           )}
         </>
       ) : (

@@ -9,6 +9,7 @@ import {
 } from "../../slices/userSlice";
 import { setIsOnline } from "../../slices/ChatSlice";
 import { useSocket } from "../../context/SocketContext";
+import { RiVerifiedBadgeFill } from "react-icons/ri";
 
 interface AvailableUserChatProps {
   setEmptyChat: React.Dispatch<React.SetStateAction<boolean>>;
@@ -163,8 +164,8 @@ const AvailableUserChat: React.FC<AvailableUserChatProps> = ({
                   </div>
                   <div className="flex flex-col w-full">
                     <div className="flex justify-between items-center">
-                      <p className="text-[15px] font-medium">
-                        {user.firstName} {user.lastName}
+                      <p className="text-[15px] font-medium flex items-center gap-1">
+                        {user.firstName} {user.lastName} {user.isVerified ? <RiVerifiedBadgeFill className="text-[--highlighted-color]" /> : null}
                       </p>
                       <div className="time text-sm font-light">
                         {user?.lastMessage?.createdAt

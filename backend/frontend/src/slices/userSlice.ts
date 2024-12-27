@@ -20,6 +20,8 @@ export interface UserProfile {
   lastName: string;
   email: string;
   username: string;
+  isVerified: boolean;
+  isAdmin: boolean;
 }
 
 export interface OtherUserProfile {
@@ -28,6 +30,8 @@ export interface OtherUserProfile {
   email: string;
   username: string;
   _id: string;
+  isVerified: boolean;
+  isAdmin: boolean;
 }
 
 interface UserState {

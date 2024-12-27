@@ -86,15 +86,15 @@ export function Chats({ chatId }: ChatsProps) {
 
   // Handle infinite scroll
   const handleScroll = useCallback(() => {
-    if (
-      chatContainerRef.current &&
-      chatContainerRef.current.scrollTop <= 0 &&
-      !loading &&
-      messages.length > 0
-    ) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      dispatch(getAllChats({ chatId, page: nextPage, limit: 10 }));
+    const container = chatContainerRef.current;
+    if (!container) return;
+    if(container.scrollTop === 0 && !loading && messages.length > 0){
+      const previousHeight = container.scrollHeight;
+      setPage(page + 1);
+      dispatch(getAllChats({ chatId, page: page + 1, limit: 10 })).then(() => {
+        const newHeight = container.scrollHeight;
+        container.scrollTop = newHeight - previousHeight;
+      });
     }
   }, [chatId, dispatch, loading, messages.length, page]);
 

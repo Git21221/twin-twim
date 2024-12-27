@@ -15,6 +15,9 @@ const getSocket = () => {
     auth: {
       token: accessToken,
     },
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 2000,
   });
 };
 

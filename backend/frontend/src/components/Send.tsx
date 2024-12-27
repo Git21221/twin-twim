@@ -3,9 +3,12 @@ import { AppDispatch, RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { addMessage } from "../slices/ChatSlice";
 import { resetMessage, resetSubmit } from "../slices/messageSlice";
+import { setUser } from "../slices/userSlice";
 
-function Send({ chatId }: { chatId: string }) {
-  const { newMessage, submit } = useSelector((state: RootState) => state.message);
+function Send({ chatId, personToChat }: { chatId: string, personToChat: string }) {
+  const { newMessage, submit } = useSelector(
+    (state: RootState) => state.message
+  );
   const dispatch = useDispatch<AppDispatch>();
   const { profile } = useSelector((state: any) => state.users);
 
@@ -16,7 +19,7 @@ function Send({ chatId }: { chatId: string }) {
       });
     }
   }, [submit]);
-  
+
   const handleSendMessage = async () => {
     if (newMessage.trim() === "") return;
 
@@ -31,23 +34,35 @@ function Send({ chatId }: { chatId: string }) {
     );
 
     try {
-      const response = await fetch(
-        `/api/messages/${chatId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message: newMessage }),
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`/api/messages/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: newMessage }),
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to send message");
       }
       const data = await response.json();
-      console.log(data);
+      console.log("Message sent:", data);
+      if (data.statusCode === 200) {
+        dispatch(
+          setUser({
+            _id: personToChat,
+            firstName: "",
+            lastName: "",
+            lastMessage: {
+              id: data.message._id,
+              sender: profile, // Use "me" or your current user ID
+              content: newMessage,
+              createdAt: new Date().toISOString(),
+            },
+          })
+        );
+      }
       dispatch(resetMessage()); // Clear input after sending
     } catch (error) {}
   };

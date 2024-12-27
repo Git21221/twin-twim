@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from "../../store/store";
 import { fetchUserById } from "../../slices/userSlice";
 import SearchIcon from "../SearchIcon";
 import { useSocket } from "../../context/SocketContext";
+import { RiVerifiedBadgeFill } from "react-icons/ri";
 
 function Profiletop({
   personToChat,
@@ -25,11 +26,13 @@ function Profiletop({
     chatId: "",
   });
   console.log("person typing", typing);
-  
+
   const dispatch = useDispatch<AppDispatch>();
-  const { otherUserProfile, profile } = useSelector((state: RootState) => state.users);
+  const { otherUserProfile, profile } = useSelector(
+    (state: RootState) => state.users
+  );
   console.log("profile", profile);
-  
+
   const { onlineUsers } = useSelector(
     (state: RootState) => state.availableUser
   );
@@ -60,8 +63,11 @@ function Profiletop({
           <div className="circle h-[45px] w-[45px] rounded-full bg-[--main-text-color]"></div>
         </div>
         <div className="profileNameAndLastSeen flex flex-col gap-[2px]">
-          <div className="profileName text-[var(--main-text-color)] font-semibold">
-            {otherUserProfile?.firstName} {otherUserProfile?.lastName}
+          <div className="profileName text-[var(--main-text-color)] font-semibold flex items-center gap-1">
+            {otherUserProfile?.firstName} {otherUserProfile?.lastName}{" "}
+            {otherUserProfile?.isVerified ? (
+              <RiVerifiedBadgeFill className="text-[--highlighted-color]" />
+            ) : null}
           </div>
           <div className="lastSeen text-[var(--main-text-color)] text-xs font-light">
             {typing && typing?.senderId === personToChat && typing.isTyping ? (
